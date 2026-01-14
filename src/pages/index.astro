@@ -5,6 +5,7 @@ import {
 	IconTrash,
 	IconCalendarEvent,
 } from "@tabler/icons-react";
+import Calendar from "../components/Calendar";
 ---
 
 <Layout>
@@ -23,11 +24,13 @@ import {
 					</div>
 					<div>
 						<h1
+							id="header-title"
 							class="text-xl font-extrabold tracking-tight leading-none text-gray-900 dark:text-white print:text-black"
 						>
 							Planificador Semanal
 						</h1>
 						<p
+							id="header-subtitle"
 							class="text-xs text-gray-500 dark:text-gray-400 font-medium print:text-gray-600"
 						>
 							Horario de productividad
@@ -61,7 +64,6 @@ import {
 							class="group flex cursor-pointer relative items-center justify-center h-full px-3 rounded-md transition-all"
 						>
 							<input
-								checked=""
 								class="peer sr-only"
 								name="lang"
 								type="radio"
@@ -82,17 +84,21 @@ import {
 					</div>
 					<div class="flex items-center gap-2">
 						<button
+							id="btn-clear"
 							class="flex items-center justify-center h-10 px-4 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors gap-2 group"
+							onclick="window.dispatchEvent(new CustomEvent('calendar-clear'))"
 						>
 							<IconTrash stroke={1.25} />
-							<span class="hidden sm:inline">Borrar Todo</span>
+							<span class="hidden sm:inline" id="label-clear"
+								>Borrar Todo</span
+							>
 						</button>
 						<button
+							id="btn-download"
 							class="flex items-center justify-center h-10 px-5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-bold shadow-lg shadow-primary/25 transition-all active:scale-95 gap-2"
-							onclick="window.print()"
 						>
 							<IconDownload stroke={1.25} />
-							<span>Descargar PDF</span>
+							<span id="label-download">Descargar PDF</span>
 						</button>
 					</div>
 				</div>
@@ -102,327 +108,169 @@ import {
 	<main
 		class="flex-grow w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 print:p-0 print:max-w-none print:w-full relative"
 	>
-		<div
-			class="print-container bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-transparent dark:border-gray-800 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50"
-		>
-			<div class="overflow-x-auto w-full relative">
-				<div
-					class="absolute inset-0 pointer-events-none z-10 hidden sm:block w-full min-w-[900px]"
-				>
-					<div
-						class="group absolute pointer-events-auto bg-teal-100/90 dark:bg-teal-900/60 border-l-4 border-teal-500 shadow-md rounded-r-md rounded-bl-sm flex flex-col justify-center items-center text-center p-2 backdrop-blur-[2px] transition-all ring-2 ring-teal-500/20 z-30"
-						style="top: 161px; left: 65px; width: calc(13% - 2px); height: 111px;"
-					>
-						<div
-							class="absolute top-1 right-1 flex gap-1 opacity-100 transition-opacity"
-						>
-							<button
-								class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/60 dark:hover:bg-black/30 text-teal-700 dark:text-teal-200 transition-colors"
-								title="Editar"
-							>
-								<span
-									class="material-symbols-outlined text-[16px]"
-									>edit</span
-								>
-							</button>
-							<button
-								class="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/60 dark:hover:bg-black/30 text-teal-700 dark:text-teal-200 transition-colors"
-								title="Eliminar"
-							>
-								<span
-									class="material-symbols-outlined text-[16px]"
-									>delete</span
-								>
-							</button>
-						</div>
-						<span
-							class="text-teal-800 dark:text-teal-100 font-bold text-xs sm:text-sm leading-tight"
-							>Reunión de Equipo</span
-						>
-						<span
-							class="text-teal-700/80 dark:text-teal-200/70 text-[10px] font-medium mt-0.5"
-							>10:00 - 12:00</span
-						>
-						<div
-							class="absolute -bottom-14 left-1/2 -translate-x-1/2 bg-white dark:bg-surface-dark shadow-xl shadow-gray-400/10 dark:shadow-black/40 rounded-full py-2 px-3 flex items-center gap-2 border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
-						>
-							<button
-								aria-label="Teal"
-								class="w-5 h-5 rounded-full bg-teal-200 ring-2 ring-offset-1 ring-teal-500 dark:ring-offset-surface-dark hover:scale-110 transition-transform"
-							></button>
-							<button
-								aria-label="Lavender"
-								class="w-5 h-5 rounded-full bg-violet-200 hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-violet-300 dark:hover:ring-offset-surface-dark transition-all"
-							></button>
-							<button
-								aria-label="Peach"
-								class="w-5 h-5 rounded-full bg-orange-200 hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-orange-300 dark:hover:ring-offset-surface-dark transition-all"
-							></button>
-							<button
-								aria-label="Mint"
-								class="w-5 h-5 rounded-full bg-emerald-200 hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-emerald-300 dark:hover:ring-offset-surface-dark transition-all"
-							></button>
-							<button
-								aria-label="Sky Blue"
-								class="w-5 h-5 rounded-full bg-sky-200 hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-sky-300 dark:hover:ring-offset-surface-dark transition-all"
-							></button>
-						</div>
-						<div
-							class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white dark:bg-surface-dark rotate-45 border-l border-t border-gray-100 dark:border-gray-700"
-						>
-						</div>
-					</div>
-					<div
-						class="group absolute pointer-events-auto bg-sky-100/80 dark:bg-sky-900/40 border-l-4 border-sky-400 shadow-sm rounded-r-md rounded-bl-sm flex flex-col justify-center items-center text-center p-2 backdrop-blur-[1px] hover:shadow-md hover:scale-[1.01] transition-all cursor-pointer z-20"
-						style="top: 385px; left: calc(64px + 26%); width: calc(13% - 2px); height: 83px;"
-					>
-						<div
-							class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-						>
-							<button
-								class="flex items-center justify-center w-6 h-6 rounded-full bg-white/40 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/40 text-sky-700 dark:text-sky-200 transition-colors"
-								title="Editar"
-							>
-								<span
-									class="material-symbols-outlined text-[16px]"
-									>edit</span
-								>
-							</button>
-							<button
-								class="flex items-center justify-center w-6 h-6 rounded-full bg-white/40 dark:bg-black/20 hover:bg-white/80 dark:hover:bg-black/40 text-sky-700 dark:text-sky-200 transition-colors"
-								title="Eliminar"
-							>
-								<span
-									class="material-symbols-outlined text-[16px]"
-									>delete</span
-								>
-							</button>
-						</div>
-						<span
-							class="text-sky-700 dark:text-sky-200 font-bold text-xs sm:text-sm leading-tight"
-							>Almuerzo</span
-						>
-						<span
-							class="text-sky-600/70 dark:text-sky-200/70 text-[10px] font-medium mt-0.5"
-							>14:00 - 15:30</span
-						>
-					</div>
-				</div>
-				<table
-					class="w-full min-w-[900px] border-collapse table-fixed relative z-0"
-				>
-					<thead>
-						<tr>
-							<th
-								class="w-16 h-12 bg-gray-50 dark:bg-[#1f2226] border-b border-r border-gray-100 dark:border-gray-800 p-3 text-xs font-bold text-gray-400 uppercase tracking-wider text-center sticky left-0 z-20 print:bg-gray-50 print:text-black"
-							>
-								Hora
-							</th>
-							<th
-								class="bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black"
-							>
-								Lunes
-							</th>
-							<th
-								class="bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black"
-							>
-								Martes
-							</th>
-							<th
-								class="bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black"
-							>
-								Miércoles
-							</th>
-							<th
-								class="bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black"
-							>
-								Jueves
-							</th>
-							<th
-								class="bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black"
-							>
-								Viernes
-							</th>
-							<th
-								class="bg-teal-50/30 dark:bg-teal-900/10 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-primary dark:text-primary text-center w-[13%] print:bg-white print:text-black"
-							>
-								Sábado
-							</th>
-							<th
-								class="bg-teal-50/30 dark:bg-teal-900/10 border-b border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-primary dark:text-primary text-center w-[13%] print:bg-white print:text-black"
-							>
-								Domingo
-							</th>
-						</tr>
-					</thead>
-					<tbody
-						class="divide-y divide-gray-100 dark:divide-gray-800"
-					>
-						<tr class="group">
-							<td
-								class="bg-gray-50/80 dark:bg-[#1f2226] border-r border-gray-100 dark:border-gray-800 p-2 text-xs font-semibold text-gray-500 text-center sticky left-0 z-10 print:bg-white print:text-black h-14"
-								>08:00</td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 bg-gray-50/30 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-							<td
-								class="relative p-0 h-14 bg-gray-50/30 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-							>
-								<input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-700 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20 focus:z-10"
-									placeholder=""
-									type="text"
-								/>
-							</td>
-						</tr>
-						<tr class="group">
-							<td
-								class="bg-gray-50/80 dark:bg-[#1f2226] border-r border-gray-100 dark:border-gray-800 p-2 text-xs font-semibold text-gray-500 text-center sticky left-0 z-10 print:bg-white print:text-black h-14"
-								>09:00</td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 border-r border-gray-100 dark:border-gray-800 h-14 bg-gray-50/30 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-							<td
-								class="relative p-0 h-14 bg-gray-50/30 dark:bg-gray-800/20 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-								><input
-									class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20"
-									type="text"
-								/></td
-							>
-						</tr>
-						<script>
-							const hours = [
-								10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-							];
-							const tbody =
-								document.querySelector("tbody") || null;
-
-							hours.forEach((hour) => {
-								const tr = document.createElement("tr");
-								tr.className = "group";
-								const time = `${hour}:00`;
-								// Time cell
-								let html = `<td class="bg-gray-50/80 dark:bg-[#1f2226] border-r border-gray-100 dark:border-gray-800 p-2 text-xs font-semibold text-gray-500 text-center sticky left-0 z-10 print:bg-white print:text-black h-14">${time}</td>`;
-								// 7 Day cells
-								for (let i = 0; i < 7; i++) {
-									const isWeekend = i >= 5;
-									const bgClass = isWeekend
-										? "bg-gray-50/30 dark:bg-gray-800/20"
-										: "";
-									const borderClass =
-										i < 6
-											? "border-r border-gray-100 dark:border-gray-800"
-											: "";
-									html += `
-                                        <td class="relative p-0 ${borderClass} h-14 ${bgClass} hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                            <input type="text" class="w-full h-full bg-transparent border-none p-2 text-sm text-gray-700 dark:text-gray-200 focus:ring-1 focus:ring-primary focus:bg-white dark:focus:bg-black/20">
-                                        </td>
-                                    `;
-								}
-								tr.innerHTML = html;
-								tbody.appendChild(tr);
-							});
-						</script>
-					</tbody>
-				</table>
-			</div>
-		</div>
+		<Calendar client:load />
 	</main>
 	<footer
 		class="py-6 text-center text-xs text-gray-400 dark:text-gray-600 no-print"
 	>
-		<p>© 2023 Planificador Semanal. Diseño enfocado en claridad.</p>
+		<p id="footer-text">
+			© 2026 Planificador Semanal. Diseño enfocado en claridad.
+		</p>
 	</footer>
+
+	<script>
+		import { translations, type Language } from "../lib/i18n";
+		import html2canvas from "html2canvas";
+		import { jsPDF } from "jspdf";
+
+		const updateUI = (lang: Language) => {
+			const t = translations[lang];
+			const title = document.getElementById("header-title");
+			const subtitle = document.getElementById("header-subtitle");
+			const labelClear = document.getElementById("label-clear");
+			const labelDownload = document.getElementById("label-download");
+			const footerText = document.getElementById("footer-text");
+
+			if (title) title.textContent = t.title;
+			if (subtitle) subtitle.textContent = t.subtitle;
+			if (labelClear) labelClear.textContent = t.clearAll;
+			if (labelDownload) labelDownload.textContent = t.downloadPDF;
+			if (footerText)
+				footerText.textContent = `© 2026 ${t.title}. Diseño enfocado en claridad.`;
+		};
+
+		// 1. Detect language
+		let currentLang = localStorage.getItem("calendar-lang") as Language;
+		if (!currentLang || (currentLang !== "ES" && currentLang !== "EN")) {
+			const browserLang = navigator.language.split("-")[0].toUpperCase();
+			currentLang =
+				browserLang === "EN" || browserLang === "ES"
+					? (browserLang as Language)
+					: "ES";
+			localStorage.setItem("calendar-lang", currentLang);
+		}
+
+		// 2. Set initial radio state
+		const radios = document.querySelectorAll('input[name="lang"]');
+		radios.forEach((element) => {
+			const radio = element as HTMLInputElement;
+			if (radio.value === currentLang) {
+				radio.checked = true;
+			}
+
+			radio.addEventListener("change", (e) => {
+				const target = e.target as HTMLInputElement;
+				const newLang = target.value as Language;
+				localStorage.setItem("calendar-lang", newLang);
+				updateUI(newLang);
+				window.dispatchEvent(
+					new CustomEvent("calendar-lang-change", {
+						detail: newLang,
+					}),
+				);
+			});
+		});
+
+		// 3. PDF Export
+		const btnDownload = document.getElementById("btn-download");
+		if (btnDownload) {
+			btnDownload.addEventListener("click", async () => {
+				const calendar = document.getElementById("calendar-to-export");
+				if (!calendar) return;
+
+				// Force light mode for export
+				const isDark =
+					document.documentElement.classList.contains("dark");
+				if (isDark) document.documentElement.classList.remove("dark");
+
+				try {
+					const canvas = await html2canvas(calendar, {
+						scale: 2,
+						useCORS: true,
+						logging: false,
+						backgroundColor: "#ffffff",
+						onclone: (clonedDoc) => {
+							// 1. Fix style tags (where Tailwind v4 injects most oklch/oklab)
+							const styleTags =
+								clonedDoc.getElementsByTagName("style");
+							for (let i = 0; i < styleTags.length; i++) {
+								const style = styleTags[i];
+								if (style.innerHTML) {
+									style.innerHTML = style.innerHTML.replace(
+										/okl(ab|ch)\([^)]+\)/g,
+										"rgba(0,0,0,0.1)",
+									);
+								}
+							}
+
+							// 2. Fix inline styles
+							const elements = clonedDoc.querySelectorAll("*");
+							elements.forEach((el) => {
+								const htmlEl = el as HTMLElement;
+								const style = htmlEl.style;
+								if (!style) return;
+
+								const props = [
+									"color",
+									"backgroundColor",
+									"borderColor",
+									"fill",
+									"stroke",
+								];
+								props.forEach((prop) => {
+									const val = style[prop as any];
+									if (
+										val &&
+										(val.includes("oklab") ||
+											val.includes("oklch"))
+									) {
+										style[prop as any] = "";
+									}
+								});
+							});
+						},
+					});
+
+					// Restore dark mode
+					if (isDark) document.documentElement.classList.add("dark");
+
+					const imgData = canvas.toDataURL("image/png");
+
+					// Calculate dimensions (Landscape)
+					const pdf = new jsPDF({
+						orientation: "landscape",
+						unit: "px",
+						format: [canvas.width + 40, canvas.height + 100],
+					});
+
+					pdf.addImage(
+						imgData,
+						"PNG",
+						20,
+						20,
+						canvas.width,
+						canvas.height,
+					);
+
+					// Add custom footer
+					pdf.setFontSize(16);
+					pdf.setTextColor(100, 100, 100);
+					pdf.text(
+						"Creado con una herramienta de jvngarcia.com",
+						(canvas.width + 40) / 2,
+						canvas.height + 70,
+						{ align: "center" },
+					);
+
+					pdf.save(`planificador-${new Date().getTime()}.pdf`);
+				} catch (err) {
+					console.error("Error generating PDF", err);
+					if (isDark) document.documentElement.classList.add("dark");
+				}
+			});
+		}
+
+		// 4. Initial UI update
+		updateUI(currentLang);
+	</script>
 </Layout>
