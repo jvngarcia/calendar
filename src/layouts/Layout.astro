@@ -1,3 +1,7 @@
+---
+import "../styles/global.css";
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -6,8 +10,38 @@
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
+
+		<style>
+			@media print {
+				@page {
+					size: landscape;
+					margin: 0.5cm;
+				}
+				body {
+					-webkit-print-color-adjust: exact;
+					print-color-adjust: exact;
+					background-color: white !important;
+				}
+				.no-print {
+					display: none !important;
+				}
+				input {
+					border: none !important;
+					background: transparent !important;
+				}
+				::-webkit-scrollbar {
+					display: none;
+				}
+				.print-container {
+					box-shadow: none !important;
+					border: 1px solid #e5e7eb !important;
+				}
+			}
+		</style>
 	</head>
-	<body>
+	<body
+		class="bg-background-light dark:bg-background-dark font-display text-[#131615] dark:text-[#f1f3f3] min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200"
+	>
 		<slot />
 	</body>
 </html>

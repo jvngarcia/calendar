@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* 1. Configuración de Dark Mode (equivalente a darkMode: "class")
+  Esto permite activar el modo oscuro añadiendo la clase 'dark' a un elemento padre (como <html> o <body>).
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    /* 2. Colores 
+    Se definen con --color-*. Tailwind generará automáticamente clases como 
+    bg-primary, text-primary-dark, etc.
+  */
+    --color-primary: #6aafa5;
+    --color-primary-dark: #5a9a90;
+    --color-background-light: #f7f7f7;
+    --color-background-dark: #1a1c1e;
+    --color-surface-dark: #22252a;
+
+    /* 3. Tipografía 
+    Genera clases como font-display y font-body.
+  */
+    --font-display: "Manrope", sans-serif;
+    --font-body: "Noto Sans", sans-serif;
+
+    /* 4. Bordes (Border Radius) 
+    El valor 'DEFAULT' de v3 se mapea usualmente a --radius.
+    Los demás siguen el patrón --radius-*.
+  */
+    --radius: 0.25rem;
+    /* Equivalente a rounded */
+    --radius-lg: 0.5rem;
+    /* Equivalente a rounded-lg */
+    --radius-xl: 0.75rem;
+    /* Equivalente a rounded-xl */
+    --radius-2xl: 1rem;
+    /* Equivalente a rounded-2xl */
+    --radius-full: 9999px;
+    /* Equivalente a rounded-full */
+
+    /* 5. Sombras (Box Shadow)
+    Genera clases como shadow-soft y shadow-card.
+  */
+    --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
