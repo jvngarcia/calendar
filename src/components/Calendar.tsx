@@ -1,25 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { cn } from '../lib/utils';
 import {
     IconPlus,
     IconTrash,
     IconX,
     IconClock,
-    IconCalendar
+    IconCalendar,
+    IconCopy,
+    IconEdit
 } from '@tabler/icons-react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { format, addHours, startOfDay } from 'date-fns';
-import { translations, type Language } from '../lib/i18n';
-
-interface CalendarEvent {
-    id: string;
-    title: string;
-    day: number; // 0-6
-    startHour: number; // decimal hour, e.g., 10.5 for 10:30
-    endHour: number;
-    color: string;
-}
+import { translations } from '../lib/i18n';
+import { useCalendarStore, type CalendarEvent } from '../lib/store';
 
 const COLORS = [
     { name: 'Teal', bg: 'bg-teal-100/90 dark:bg-teal-900/60', border: 'border-teal-500', text: 'text-teal-800 dark:text-teal-100', dot: 'bg-teal-500' },
@@ -29,16 +23,26 @@ const COLORS = [
     { name: 'Sky', bg: 'bg-sky-100/90 dark:bg-sky-900/60', border: 'border-sky-500', text: 'text-sky-800 dark:text-sky-100', dot: 'bg-sky-500' },
 ];
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const HOUR_HEIGHT = 56; // h-14 is 3.5rem = 56px
 
 export default function Calendar() {
-    const [lang, setLang] = useState<Language>('ES');
+    const lang = useCalendarStore(state => state.lang);
+    const startHour = useCalendarStore(state => state.startHour);
+    const endHour = useCalendarStore(state => state.endHour);
+    const events = useCalendarStore(state => state.events);
+    const addEvent = useCalendarStore(state => state.addEvent);
+    const updateEvent = useCalendarStore(state => state.updateEvent);
+    const deleteEvent = useCalendarStore(state => state.deleteEvent);
+
     const t = translations[lang];
 
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [eventToDelete, setEventToDelete] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const hoursRange = useMemo(() => {
+        return Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
+    }, [startHour, endHour]);
+
     const [newEvent, setNewEvent] = useState<Partial<CalendarEvent>>({
         title: '',
         day: 0,
@@ -47,46 +51,35 @@ export default function Calendar() {
         color: 'Teal'
     });
 
-    React.useEffect(() => {
-        // Initial language detection
-        const storedLang = localStorage.getItem('calendar-lang') as Language;
-        if (storedLang && (storedLang === 'ES' || storedLang === 'EN')) {
-            setLang(storedLang);
-        } else {
-            const browserLang = navigator.language.split('-')[0].toUpperCase();
-            const defaultLang = (browserLang === 'EN' || browserLang === 'ES') ? browserLang as Language : 'ES';
-            setLang(defaultLang);
-            localStorage.setItem('calendar-lang', defaultLang);
-        }
-
-        const handleClear = () => setEvents([]);
-        const handleLangChange = (e: any) => setLang(e.detail);
-
-        window.addEventListener('calendar-clear', handleClear);
-        window.addEventListener('calendar-lang-change', handleLangChange);
-
-        // Initial default events only if none exist (or just once)
-        setEvents(t.defaultEvents.map(e => ({ ...e, id: Math.random().toString(36).substr(2, 9) })));
-
-        return () => {
-            window.removeEventListener('calendar-clear', handleClear);
-            window.removeEventListener('calendar-lang-change', handleLangChange);
-        };
-    }, []);
-
     const handleAddEvent = () => {
         if (newEvent.title && newEvent.startHour !== undefined && newEvent.endHour !== undefined) {
-            const id = Math.random().toString(36).substr(2, 9);
-            setEvents([...events, { ...newEvent, id } as CalendarEvent]);
+            if (newEvent.id) {
+                const { id, ...eventDetails } = newEvent;
+                updateEvent(id, eventDetails);
+            } else {
+                addEvent(newEvent as Omit<CalendarEvent, 'id'>);
+            }
             setIsDialogOpen(false);
             setNewEvent({ title: '', day: 0, startHour: 9, endHour: 10, color: 'Teal' });
         }
     };
 
-    const deleteEvent = (id: string) => {
-        setEvents(events.filter(e => e.id !== id));
+    const handleDeleteConfirm = (id: string) => {
+        deleteEvent(id);
         setEventToDelete(null);
     };
+
+    const handleCopyEvent = (event: CalendarEvent) => {
+        const { id, ...eventCopy } = event;
+        setNewEvent(eventCopy);
+        setIsDialogOpen(true);
+    };
+
+    const handleEditEvent = (event: CalendarEvent) => {
+        setNewEvent(event);
+        setIsDialogOpen(true);
+    };
+
 
     return (
         <div id="calendar-to-export" className="bg-white dark:bg-surface-dark rounded-2xl shadow-soft border border-transparent dark:border-gray-800 overflow-hidden ring-1 ring-gray-200/50 dark:ring-gray-700/50">
@@ -101,7 +94,7 @@ export default function Calendar() {
                                 </th>
                                 {t.days.map((day, i) => (
                                     <th
-                                        key={day}
+                                        key={i}
                                         className={cn(
                                             "bg-gray-50/50 dark:bg-[#1f2226]/50 border-b border-r border-gray-100 dark:border-gray-800 p-3 text-sm font-bold text-gray-700 dark:text-gray-200 text-center w-[13%] print:bg-white print:text-black",
                                             (i >= 5) && "bg-teal-50/30 dark:bg-teal-900/10 text-primary"
@@ -113,7 +106,7 @@ export default function Calendar() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {HOURS.map((hour) => (
+                            {hoursRange.map((hour: number) => (
                                 <tr key={hour} className="group">
                                     <td className="bg-gray-50/80 dark:bg-[#1f2226] border-r border-gray-100 dark:border-gray-800 p-2 text-xs font-semibold text-gray-500 text-center sticky left-0 z-10 print:bg-white print:text-black h-14 tabular-nums">
                                         {hour}:00
@@ -147,8 +140,10 @@ export default function Calendar() {
                         style={{ top: '48px', left: '120px', width: 'calc(100% - 118px)', height: 'calc(100% - 48px)' }}
                     >
                         {events.map((event) => {
+                            if (event.startHour < startHour || event.endHour > endHour) return null;
+
                             const colorConfig = COLORS.find(c => c.name === event.color) || COLORS[0];
-                            const top = event.startHour * HOUR_HEIGHT;
+                            const top = (event.startHour - startHour) * HOUR_HEIGHT;
                             const height = (event.endHour - event.startHour) * HOUR_HEIGHT;
                             const width = 100 / 7;
                             const left = event.day * width;
@@ -156,8 +151,9 @@ export default function Calendar() {
                             return (
                                 <div
                                     key={event.id}
+                                    onClick={(e) => { e.stopPropagation(); handleEditEvent(event); }}
                                     className={cn(
-                                        "absolute pointer-events-auto border-l-4 shadow-sm rounded-r-md rounded-bl-sm flex flex-col p-2 backdrop-blur-[2px] transition-all group",
+                                        "absolute pointer-events-auto border-l-4 shadow-sm rounded-r-md rounded-bl-sm flex flex-col p-2 backdrop-blur-[2px] transition-all group cursor-pointer",
                                         colorConfig.bg,
                                         colorConfig.border
                                     )}
@@ -171,8 +167,22 @@ export default function Calendar() {
                                 >
                                     <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); setEventToDelete(event.id); }}
+                                            onClick={(e) => { e.stopPropagation(); handleEditEvent(event); }}
                                             className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/60 dark:hover:bg-black/30 transition-colors"
+                                            aria-label={t.edit}
+                                        >
+                                            <IconEdit className="size-3.5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleCopyEvent(event); }}
+                                            className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/60 dark:hover:bg-black/30 transition-colors"
+                                            aria-label={t.copy}
+                                        >
+                                            <IconCopy className="size-3.5" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setEventToDelete(event.id); }}
+                                            className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-white/60 dark:hover:bg-black/30 transition-colors text-red-500 hover:text-red-600"
                                             aria-label={t.deleteAction}
                                         >
                                             <IconTrash className="size-3.5" />
@@ -192,7 +202,12 @@ export default function Calendar() {
             </div>
 
             {/* Dialogs */}
-            <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog.Root open={isDialogOpen} onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) {
+                    setNewEvent({ title: '', day: 0, startHour: 9, endHour: 10, color: 'Teal' });
+                }
+            }}>
                 <Dialog.Portal>
                     <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 animate-in fade-in duration-200" />
                     <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-surface-dark rounded-2xl shadow-2xl p-6 z-50 animate-in zoom-in-95 fade-in duration-200 border border-gray-100 dark:border-gray-800">
@@ -201,7 +216,7 @@ export default function Calendar() {
                                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
                                     <IconCalendar stroke={1.5} />
                                 </div>
-                                {t.newActivity}
+                                {newEvent.id ? t.editActivity : t.newActivity}
                             </Dialog.Title>
                             <Dialog.Close asChild>
                                 <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition-colors" aria-label={t.cancel}>
@@ -310,7 +325,7 @@ export default function Calendar() {
             <AlertDialog.Root open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
                 <AlertDialog.Portal>
                     <AlertDialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 animate-in fade-in duration-200" />
-                    <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white dark:bg-surface-dark rounded-2xl shadow-2xl p-6 z-50 animate-in zoom-in-95 fade-in duration-200 border border-gray-100 dark:border-gray-800">
+                    <AlertDialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white dark:bg-surface-dark rounded-2xl shadow-2xl p-6 z-50 animate-in zoom-in-95 fade-in duration-200 border border-gray-100 dark:border-gray-800">
                         <AlertDialog.Title className="text-xl font-bold text-gray-900 dark:text-white text-balance mb-2">
                             {t.deleteTitle}
                         </AlertDialog.Title>
@@ -325,7 +340,7 @@ export default function Calendar() {
                             </AlertDialog.Cancel>
                             <AlertDialog.Action asChild>
                                 <button
-                                    onClick={() => eventToDelete && deleteEvent(eventToDelete)}
+                                    onClick={() => eventToDelete && handleDeleteConfirm(eventToDelete)}
                                     className="flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold shadow-lg shadow-red-500/20 transition-all active:scale-95"
                                 >
                                     {t.deleteAction}
