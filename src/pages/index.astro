@@ -120,7 +120,7 @@ import Calendar from "../components/Calendar";
 
 	<script>
 		import { translations, type Language } from "../lib/i18n";
-		import html2canvas from "html2canvas";
+		import { domToCanvas } from "modern-screenshot";
 		import { jsPDF } from "jspdf";
 
 		const updateUI = (lang: Language) => {
@@ -184,51 +184,10 @@ import Calendar from "../components/Calendar";
 				if (isDark) document.documentElement.classList.remove("dark");
 
 				try {
-					const canvas = await html2canvas(calendar, {
+					// modern-screenshot handles oklch/oklab correctly
+					const canvas = await domToCanvas(calendar, {
 						scale: 2,
-						useCORS: true,
-						logging: false,
 						backgroundColor: "#ffffff",
-						onclone: (clonedDoc) => {
-							// 1. Fix style tags (where Tailwind v4 injects most oklch/oklab)
-							const styleTags =
-								clonedDoc.getElementsByTagName("style");
-							for (let i = 0; i < styleTags.length; i++) {
-								const style = styleTags[i];
-								if (style.innerHTML) {
-									style.innerHTML = style.innerHTML.replace(
-										/okl(ab|ch)\([^)]+\)/g,
-										"rgba(0,0,0,0.1)",
-									);
-								}
-							}
-
-							// 2. Fix inline styles
-							const elements = clonedDoc.querySelectorAll("*");
-							elements.forEach((el) => {
-								const htmlEl = el as HTMLElement;
-								const style = htmlEl.style;
-								if (!style) return;
-
-								const props = [
-									"color",
-									"backgroundColor",
-									"borderColor",
-									"fill",
-									"stroke",
-								];
-								props.forEach((prop) => {
-									const val = style[prop as any];
-									if (
-										val &&
-										(val.includes("oklab") ||
-											val.includes("oklch"))
-									) {
-										style[prop as any] = "";
-									}
-								});
-							});
-						},
 					});
 
 					// Restore dark mode
