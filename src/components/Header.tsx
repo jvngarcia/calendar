@@ -7,6 +7,7 @@ import LanguageSwitcher from './HeaderActions/LanguageSwitcher';
 import ClearAllButton from './HeaderActions/ClearAllButton';
 import DownloadPdfButton from './HeaderActions/DownloadPdfButton';
 import SettingsPopover from './HeaderActions/SettingsPopover';
+import TwitterLink from './HeaderActions/TwitterLink';
 
 export default function Header() {
     const lang = useCalendarStore(state => state.lang);
@@ -20,7 +21,7 @@ export default function Header() {
                         <div className="flex items-center justify-center size-10 rounded-xl bg-primary/10 text-primary print:border print:border-primary/20">
                             <IconCalendarEvent stroke={1.25} />
                         </div>
-                        <div>
+                        <div className="flex flex-col gap-1">
                             <h1 className="text-xl font-extrabold tracking-tight leading-none text-gray-900 dark:text-white print:text-black">
                                 {t.title}
                             </h1>
@@ -31,7 +32,11 @@ export default function Header() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 md:gap-4 justify-center md:justify-end w-full md:w-auto no-print">
-                        <LanguageSwitcher />
+                        <div className="flex items-center gap-2">
+                            <TwitterLink />
+                            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                            <LanguageSwitcher />
+                        </div>
                         <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
                         <div className="flex items-center gap-2">
                             <ClearAllButton />
