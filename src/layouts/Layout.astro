@@ -38,6 +38,20 @@ import "../styles/global.css";
 				}
 			}
 		</style>
+		<!-- Google tag (gtag.js) -->
+		<script
+			async
+			src="https://www.googletagmanager.com/gtag/js?id=G-JMVWGDFGG8"
+		></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag("js", new Date());
+
+			gtag("config", "G-JMVWGDFGG8");
+		</script>
 	</head>
 	<body
 		class="bg-background-light dark:bg-background-dark font-display text-[#131615] dark:text-[#f1f3f3] min-h-screen flex flex-col overflow-x-hidden transition-colors duration-200"
